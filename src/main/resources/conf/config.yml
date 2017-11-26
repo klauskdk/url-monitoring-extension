@@ -5,6 +5,13 @@ clientConfig:
     ignoreSslErrors: true
     userAgent:       Mozilla/5.0 (compatible; AppDynamics UrlMonitor; http://www.appdynamics.com/)
 
+analyticsConfig:
+    publishToAnalytics:   true
+    analyticsApiUrl:      https://analytics.api.appdynamics.com
+    globalAccountName:    <global account name>
+    apiKey:               <api key>
+    analyticsSchemaName:  UrlMonitorSchema
+
 defaultParams:
     method:          GET
     socketTimeout:   30000
@@ -91,4 +98,3 @@ sites:
 #metricPrefix: Server|Component:<TierID>|Custom Metrics|URLMonitor|
 #This will create this metric in all the tiers, under this path
 metricPrefix: Custom Metrics|URLMonitor|
-

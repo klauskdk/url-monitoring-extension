@@ -1,6 +1,7 @@
 package com.appdynamics.extensions.urlmonitor;
 
 import com.appdynamics.extensions.PathResolver;
+import com.appdynamics.extensions.datastore.analytics.AnalyticsDatastore;
 import com.appdynamics.extensions.urlmonitor.SiteResult.ResultStatus;
 import com.appdynamics.extensions.urlmonitor.auth.AuthSchemeFactory;
 import com.appdynamics.extensions.urlmonitor.auth.AuthTypeEnum;
@@ -36,6 +37,7 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
 
+import javax.naming.spi.DirStateFactory.Result;
 import javax.net.ssl.SSLContext;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -58,6 +60,7 @@ public class ThreadedUrlMonitor extends AManagedMonitor {
     private static final String CONFIG_FILE_PARAM = "config-file";
     private static final String DEFAULT_METRIC_PATH = "Custom Metrics|URL Monitor";
     private String metricPath = DEFAULT_METRIC_PATH;
+    private AnalyticsDatastore analyticsDatastore;
     protected MonitorConfig config;
 
     public ThreadedUrlMonitor() {
@@ -154,6 +157,17 @@ public class ThreadedUrlMonitor extends AManagedMonitor {
         if (config == null)
             return null;
 
+        // Setting analytics configurations
+        if(this.config.getAnalyticsConfig().getPublishToAnalytics() == true)
+        	this.analyticsDatastore = new AnalyticsDatastore(
+        			ThreadedUrlMonitor.log, 
+        			this.config.getAnalyticsConfig().getAnalyticsApiUrl(), 
+        			this.config.getAnalyticsConfig().getGlobalAccountName(), 
+        			this.config.getAnalyticsConfig().getApiKey(), 
+        			this.config.getAnalyticsConfig().getAnalyticsSchemaName(),
+        			SiteResultAsObjectStructureMap()
+        			);
+        
         if (!Strings.isNullOrEmpty(config.getMetricPrefix())) {
             metricPath = StringUtils.stripEnd(config.getMetricPrefix(), "|");
         }
@@ -228,6 +242,10 @@ public class ThreadedUrlMonitor extends AManagedMonitor {
                         }
 
                         private void printMetricsForRequestCompleted(List<SiteResult> results, SiteConfig site) {
+                        	//Writing metrics to analytics
+                        	if(!results.isEmpty() && IsWritingToAnalyticsEnabled()) 
+                        		WriteMetricsToAnalytics(site, results.get(0));
+                        	
                             String myMetricPath = metricPath + "|" + site.getName();
                             int resultCount = results.size();
 
@@ -279,7 +297,8 @@ public class ThreadedUrlMonitor extends AManagedMonitor {
                             printMetricWithValue(myMetricPath + "|Download Time (ms)", Long.toString(averageDownloadTime));
                             printMetricWithValue(myMetricPath + "|First Byte Time (ms)", Long.toString(averageFirstByteTime));
                             printMetricWithValue(myMetricPath + "|Response Code", Integer.toString(statusCode));
-                            printMetricWithValue(myMetricPath + "|Status", Long.toString(status.ordinal()));
+                            // If use of simple return codes is enabled, "success" will return 1 - and everything else will return 0
+                            printMetricWithValue(myMetricPath + "|Status", config.getClientConfig().getUseSimpleReturnCodes() ? (status == ResultStatus.SUCCESS ? "1" : "0") : Long.toString(status.ordinal()));
                             printMetricWithValue(myMetricPath + "|Response Bytes", Long.toString(responseSize));
                             //printMetricWithValue(myMetricPath + "|Availability", Integer.toString(availability));
 
@@ -544,5 +563,98 @@ public class ThreadedUrlMonitor extends AManagedMonitor {
         monitor.execute(taskArgs, null);
 
     }
+    
+    protected boolean IsWritingToAnalyticsEnabled(){
+    	return analyticsDatastore!=null && config.getAnalyticsConfig().getPublishToAnalytics() == true;
+    }
 
+    protected void WriteMetricsToAnalytics(SiteConfig site, SiteResult resultObj) {
+    	
+    	try {
+    		Map<String, Object> siteResultAsMap = SiteResultToObjectMap(site, resultObj);
+	    	this.analyticsDatastore.PublishEvent(this.config.getAnalyticsConfig().getAnalyticsSchemaName(), siteResultAsMap);
+    	} catch(Exception e){
+    		log.error("Unhandled error in WriteMetricsToAnalytics: " + e.getMessage(), e);
+    	}
+    }
+    
+    protected static Map<String, Object> SiteResultAsObjectStructureMap(){
+    	
+    	// Creating a dummy object of the SiteResult object for the sake of defining the object structure
+    	SiteResult sr = new SiteResult();
+    	
+    	sr.setStatus(ResultStatus.SUCCESS);
+    	sr.setResponseCode(200);
+    	sr.setTotalTime(100);
+    	sr.setDownloadTime(100);
+    	sr.setFirstByteTime(100);
+    	sr.setResponseBytes(100);
+    	
+    	HashMap<String, Integer> map = new HashMap<String, Integer>();
+    	map.put("", 1);
+    	sr.setMatches(map);
+
+    	// Creating a dummy object of the SiteConfig object for the sake of defining the object structure
+    	SiteConfig sc = new SiteConfig();
+    	sc.setUrl("");
+    	sc.setName("");
+    	sc.setGroupName("");
+    	
+    	sc.setAuthType("");
+    	sc.setConnectTimeout(0);
+    	sc.setEncryptedPassword("");
+    	sc.setEncryptionKey("");
+    	sc.setFollowRedirects(true);
+    	sc.setHeaders(null);
+    	sc.setKeyStorePassword("");
+    	sc.setKeyStoreType("");
+    	sc.setMatchPatterns(null);
+    	sc.setMethod("");
+    	sc.setNumAttempts(0);
+    	sc.setPassword("");
+    	sc.setProxyConfig(null);
+    	sc.setRequestPayloadFile("");
+    	sc.setSocketTimeout(0);
+    	sc.setTreatAuthFailedAsError(true);
+    	sc.setTrustStorePassword("");
+    	sc.setTrustStorePath("");
+    	sc.setUsername("");
+    	
+    	
+    	return SiteResultToObjectMap(sc, sr);
+    	
+    }
+    
+    protected static Map<String, Object> SiteResultToObjectMap(SiteConfig site, SiteResult siteResult){
+
+    	Map<String, Object> r = new HashMap<String, Object>();
+    	
+    	r.put("Name", site.getName() != null ? site.getName() : "");
+    	r.put("GroupName", site.getGroupName() != null ? site.getGroupName() : "");
+    	r.put("Url", site.getUrl() != null ? site.getUrl() : "");
+    	
+    	r.put("Status", siteResult.getStatus().toString());
+    	r.put("ResponseCode", siteResult.getResponseCode());
+    	r.put("TotalTime", siteResult.getTotalTime());
+    	r.put("DownloadTime", siteResult.getDownloadTime());
+    	r.put("FirstByteTime", siteResult.getFirstByteTime());
+    	r.put("ReponseBytes", siteResult.getResponseBytes());
+    	
+    	StringBuilder sb = new StringBuilder();
+    	boolean isFirst = true;
+    	for(String matchKey : siteResult.getMatches().keySet()) {
+    		if(isFirst){
+    			sb.append(String.format("%s : %d", matchKey, siteResult.getMatches().get(matchKey)));
+    			isFirst = false;
+    		}
+    		else{
+    			sb.append(String.format(", %s : %d", matchKey, siteResult.getMatches().get(matchKey)));
+    		}
+    			
+    	}
+    	
+    	r.put("Matches", sb.toString());
+    	
+    	return r;
+    }
 }

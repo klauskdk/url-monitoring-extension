@@ -4,6 +4,7 @@ package com.appdynamics.extensions.urlmonitor.config;
 public class MonitorConfig
 {
     private ClientConfig clientConfig;
+    private AnalyticsConfig analyticsConfig;
     private DefaultSiteConfig defaultParams;
     private SiteConfig[] sites;
     private String metricPrefix;
@@ -16,6 +17,16 @@ public class MonitorConfig
     public void setClientConfig(ClientConfig clientConfig)
     {
         this.clientConfig = clientConfig;
+    }
+    
+    public AnalyticsConfig getAnalyticsConfig()
+    {
+    	return analyticsConfig;
+    }
+    
+    public void setAnalyticsConfig(AnalyticsConfig analyticsConfig)
+    {
+    	this.analyticsConfig = analyticsConfig;
     }
 
     public DefaultSiteConfig getDefaultParams()

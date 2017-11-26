@@ -9,7 +9,9 @@ public class ClientConfig
     private boolean ignoreSslErrors = false;
     private int maxRedirects = 10;
     private String userAgent = "Mozilla/5.0 (compatible; AppDynamics UrlMonitor; http://www.appdynamics.com/)";
-
+    
+    private boolean useSimpleReturnCodes = false;
+    
     public int getThreadCount()
     {
         return threadCount;
@@ -64,6 +66,15 @@ public class ClientConfig
 
     public void setUserAgent(String userAgent) { this.userAgent = userAgent; }
 
+    public boolean getUseSimpleReturnCodes()
+    {
+    	return this.useSimpleReturnCodes;
+    }
+    
+    public void setUseSimpleReturnCodes(boolean useSimpleReturnCodes)
+    {
+    	this.useSimpleReturnCodes = useSimpleReturnCodes;
+    }
 
     @Override
     public String toString()
