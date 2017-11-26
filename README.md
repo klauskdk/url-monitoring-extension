@@ -40,6 +40,13 @@ clientConfig:
     ignoreSslErrors: true
     userAgent:       Mozilla/5.0 (compatible; AppDynamics UrlMonitor; http://www.appdynamics.com/)
 
+analyticsConfig:
+    publishToAnalytics:   true
+    analyticsApiUrl:      https://analytics.api.appdynamics.com
+    globalAccountName:    <global account name>
+    apiKey:               <api key>
+    analyticsSchemaName:  UrlMonitorSchema
+
 defaultParams:
     method:          GET
     socketTimeout:   30000
@@ -180,14 +187,27 @@ POST xml or json payload to any url and search for the patterns in the response
 
 The **clientConfig** section sets options for the HTTP client library, including:
 
-| Option Name         | Default Value | Mandatory| Option Description |
-| :------------------ | :------------ | :------- | :----------------- |
-| **maxConnTotal**    | 1000          | No       |Maximum number of simultaneous HTTP connections |
-| **maxConnPerRoute** | 1000          | No       | Maximum number of simultaneous HTTP connections to a single host |
-| **threadCount**     | 10            | No       | Maximum number of Threads spawned to cater HTTP request
-| **ignoreSSlErrors** | false         | No       | Whether to ignore errors in SSL certificate validation or host validation |
-| **userAgent**       | Mozilla/5.0 (compatible; AppDynamics UrlMonitor; http://www.appdynamics.com/) | No       | Custom User-Agent header to send with requests (can be used to mimic desktop or mobile browsers) |
-| **maxRedirects**    | 10            | No       | Maximum redirects 
+| Option Name                 | Default Value | Mandatory| Option Description |
+| :-------------------------- | :------------ | :------- | :----------------- |
+| **maxConnTotal**            | 1000          | No       |Maximum number of simultaneous HTTP connections |
+| **maxConnPerRoute**         | 1000          | No       | Maximum number of simultaneous HTTP connections to a single host |
+| **threadCount**             | 10            | No       | Maximum number of Threads spawned to cater HTTP request
+| **ignoreSSlErrors**         | false         | No       | Whether to ignore errors in SSL certificate validation or host validation |
+| **userAgent**               | Mozilla/5.0 (compatible; AppDynamics UrlMonitor; http://www.appdynamics.com/) | No       | Custom User-Agent header to send with requests (can be used to mimic desktop or mobile browsers) |
+| **maxRedirects**            | 10            | No       | Maximum redirects |
+| **useSimpleReturnCodes**    | false         | No       | If set to true, value 1 will be returned if the returnCode is SUCCESS - otherwise 0 
+
+#### Analytics Config
+
+The **clientConfig** section sets options for the HTTP client library, including:
+
+| Option Name                | Default Value    | Mandatory| Option Description |
+| :------------------------- | :--------------- | :------- | :----------------- |
+| **publishToAnalytics**     | false            | No       | Defines if publishing of metrics to the Analytics Event Store is enabled |
+| **analyticsApiUrl**        | none             | No       | URL to the analytics API |
+| **globalAccountName**      | none             | No       | The global account name of the account in the controller |
+| **apiKey**                 | none             | No       | API key to use for connecting to the Analytics API (https://docs.appdynamics.com/display/latest/Managing+API+Keys) |
+| **analyticsSchemaName**    | UrlMonitorSchema | No       | Schema name to publish data to in Analytics. Must not exist already. | 
 
 #### Default Params
 

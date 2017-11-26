@@ -4,6 +4,7 @@ clientConfig:
     maxConnPerRoute: 1000
     ignoreSslErrors: true
     userAgent:       Mozilla/5.0 (compatible; AppDynamics UrlMonitor; http://www.appdynamics.com/)
+    useSimpleReturnCodes: false
 
 analyticsConfig:
     publishToAnalytics:   true
