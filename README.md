@@ -203,7 +203,7 @@ The **clientConfig** section sets options for the HTTP client library, including
 
 | Option Name                | Default Value    | Mandatory| Option Description |
 | :------------------------- | :--------------- | :------- | :----------------- |
-| **publishToAnalytics**     | false            | No       | Defines if publishing of metrics to the Analytics Event Store is enabled |
+| **publishToAnalytics**     | false            | Yes       | Defines if publishing of metrics to the Analytics Event Store is enabled |
 | **analyticsApiUrl**        | none             | No       | URL to the analytics API |
 | **globalAccountName**      | none             | No       | The global account name of the account in the controller |
 | **apiKey**                 | none             | No       | API key to use for connecting to the Analytics API (https://docs.appdynamics.com/display/latest/Managing+API+Keys) |

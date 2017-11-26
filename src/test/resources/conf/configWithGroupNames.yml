@@ -4,6 +4,9 @@ clientConfig:
     ignoreSslErrors: true
     userAgent:       Mozilla/5.0 (compatible; AppDynamics UrlMonitor; http://www.appdynamics.com/)
 
+analyticsConfig:
+    publishToAnalytics:   false
+
 defaultParams:
     method:          GET
     socketTimeout:   30000

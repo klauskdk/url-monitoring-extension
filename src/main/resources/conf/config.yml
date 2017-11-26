@@ -1,16 +1,16 @@
 # Client level configurations, common across all sites to be monitored
 clientConfig:
-    maxConnTotal:    1000
-    maxConnPerRoute: 1000
-    ignoreSslErrors: true
-    userAgent:       Mozilla/5.0 (compatible; AppDynamics UrlMonitor; http://www.appdynamics.com/)
+    maxConnTotal:         1000
+    maxConnPerRoute:      1000
+    ignoreSslErrors:      true
+    userAgent:            Mozilla/5.0 (compatible; AppDynamics UrlMonitor; http://www.appdynamics.com/)
     useSimpleReturnCodes: false
 
 analyticsConfig:
-    publishToAnalytics:   true
+    publishToAnalytics:   false
     analyticsApiUrl:      https://analytics.api.appdynamics.com
-    globalAccountName:    <global account name>
-    apiKey:               <api key>
+    globalAccountName:    
+    apiKey:               
     analyticsSchemaName:  UrlMonitorSchema
 
 defaultParams:
